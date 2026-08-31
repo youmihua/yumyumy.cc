@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>yumyumy — 计算机艺术 / 平面设计</title>
+<meta name="description" content="yumyumy 的个人作品集：计算机艺术与平面设计。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E4E4DF;
+  --ink:#1A1A18;
+  --muted:#6E6E67;
+  --line:rgba(26,26,24,.16);
+  --ph:#CBCBC4;
+  --ph-ink:rgba(26,26,24,.42);
+  --accent:#D6006E;
+  --texture:radial-gradient(circle at center, rgba(26,26,24,.13) 1px, transparent 1.2px);
+  --texture-size:9px 9px;
+  --serif:"Noto Serif SC","Songti SC",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+html[data-mode="screen"]{
+  --bg:#071016;
+  --ink:#E4F0F3;
+  --muted:#7C959D;
+  --line:rgba(228,240,243,.16);
+  --ph:#15242C;
+  --ph-ink:rgba(228,240,243,.38);
+  --accent:#35E0D0;
+  --texture:repeating-linear-gradient(0deg, rgba(53,224,208,.10) 0 1px, transparent 1px 4px);
+  --texture-size:auto;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.65;
+  transition:background-color .45s ease, color .45s ease;
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+  transition:background-color .45s ease,border-color .45s ease;
+}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:52px}
+.sitename{font-family:var(--serif);font-weight:600;letter-spacing:.02em;text-decoration:none}
+.modeflag{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);letter-spacing:.06em}
+.chip{width:13px;height:13px;border:1px solid var(--line);border-radius:50%;background:
+  conic-gradient(#D6006E 0 33%, #00A6C9 0 66%, #FFD400 0);}
+html[data-mode="screen"] .chip{border-radius:2px;background:linear-gradient(90deg,#FF4B4B 0 33%,#3BE07A 0 66%,#3B7BFF 0)}
+
+/* ---------- 报头 ---------- */
+.masthead{position:relative;padding:96px 0 68px;overflow:hidden}
+.masthead::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--texture);background-size:var(--texture-size);
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.9),transparent 72%);
+  mask-image:linear-gradient(180deg,rgba(0,0,0,.9),transparent 72%);
+}
+.masthead .wrap{position:relative;z-index:1}
+h1{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(56px,12vw,148px);
+  line-height:.92;letter-spacing:-.035em;margin:0;
+}
+.tagline{
+  font-family:var(--serif);font-size:clamp(17px,2.1vw,23px);
+  line-height:1.75;max-width:29em;margin:30px 0 0;
+}
+.meta-line{margin:26px 0 0;font-size:14px;color:var(--muted)}
+.meta-line a{text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:1px}
+.meta-line a:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ---------- 分类切换 ---------- */
+.filters{
+  position:sticky;top:52px;z-index:30;
+  background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  transition:background-color .45s ease,border-color .45s ease;
+}
+.filters .wrap{display:flex;gap:34px;align-items:baseline;height:58px;overflow-x:auto;scrollbar-width:none}
+.filters .wrap::-webkit-scrollbar{display:none}
+.tab{
+  appearance:none;background:none;border:0;padding:0;cursor:pointer;
+  font-family:var(--serif);font-size:19px;font-weight:600;color:var(--muted);
+  white-space:nowrap;position:relative;transition:color .2s ease;
+}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"]::after{
+  content:"";position:absolute;left:0;right:0;bottom:-19px;height:2px;background:var(--accent);
+}
+.tab .count{font-family:var(--sans);font-size:11px;font-weight:400;vertical-align:super;margin-left:4px;color:var(--muted)}
+
+/* ---------- 作品网格 ---------- */
+main{padding:52px 0 0}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:52px 32px}
+.work{grid-column:span 6;display:flex;flex-direction:column;gap:14px;cursor:pointer;border:0;background:none;padding:0;text-align:left;color:inherit;font:inherit}
+.work.wide{grid-column:span 12}
+.work.third{grid-column:span 4}
+
+.frame{
+  position:relative;width:100%;background:var(--ph);
+  border:1px solid var(--line);overflow:hidden;
+  transition:background-color .45s ease;
+}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.frame .slot{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:16px;gap:3px;color:var(--ph-ink);font-size:11.5px;line-height:1.5;letter-spacing:.02em;
+}
+.frame .slot .dim{font-family:var(--serif);font-size:14px}
+.frame::before{
+  content:"";position:absolute;top:14px;right:14px;width:16px;height:16px;
+  border:1px solid var(--ph-ink);border-radius:50%;
+}
+.frame::after{
+  content:"";position:absolute;top:21px;right:7px;width:30px;height:1px;background:var(--ph-ink);
+}
+.work:hover .frame,.work:focus-visible .frame{border-color:var(--accent)}
+
+.caption{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--line);padding-top:12px}
+.caption h3{font-family:var(--serif);font-size:19px;font-weight:600;margin:0;line-height:1.35}
+.caption .sub{display:block;font-family:var(--sans);font-size:13px;font-weight:400;color:var(--muted);margin-top:4px}
+.caption .year{font-size:13px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+
+/* ---------- 关于 ---------- */
+.about{margin-top:104px;border-top:1px solid var(--line);padding:64px 0 0}
+.about .cols{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.about h2{font-family:var(--serif);font-size:26px;font-weight:600;margin:0 0 18px}
+.about p{margin:0 0 16px;max-width:34em;font-size:15.5px}
+.contact{list-style:none;margin:0;padding:0;font-size:15.5px}
+.contact li{display:flex;gap:18px;padding:11px 0;border-bottom:1px solid var(--line)}
+.contact span{width:74px;flex:none;color:var(--muted);font-size:13px}
+.contact a{text-decoration:none;border-bottom:1px solid transparent}
+.contact a:hover{border-color:var(--accent);color:var(--accent)}
+
+footer{margin-top:80px;border-top:1px solid var(--line);padding:22px 0 46px;font-size:12.5px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+/* ---------- 详情弹层 ---------- */
+.sheet[hidden]{display:none}
+.sheet{
+  position:fixed;inset:0;z-index:60;background:var(--bg);
+  overflow-y:auto;padding:0 0 80px;
+}
+.sheet-bar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:2}
+.sheet-bar .wrap{display:flex;justify-content:space-between;align-items:center;height:52px}
+.sheet-bar .kind{font-size:13px;color:var(--muted)}
+.close{appearance:none;background:none;border:0;cursor:pointer;color:inherit;font:inherit;font-size:14px;padding:6px 0}
+.close:hover{color:var(--accent)}
+.sheet-body{padding-top:44px}
+.sheet-body h2{font-family:var(--serif);font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.1}
+.sheet-body .lede{font-family:var(--serif);font-size:18px;max-width:32em;margin:22px 0 0}
+.specs{display:flex;flex-wrap:wrap;gap:0 44px;margin:30px 0 40px;padding-top:18px;border-top:1px solid var(--line)}
+.specs div{padding:8px 0}
+.specs dt{font-size:12px;color:var(--muted);margin-bottom:3px}
+.specs dd{margin:0;font-family:var(--serif);font-size:16px}
+.sheet .frame + .frame{margin-top:22px}
+
+@media (max-width:820px){
+  .wrap{padding:0 20px}
+  .masthead{padding:64px 0 46px}
+  .grid{gap:40px 20px}
+  .work,.work.wide,.work.third{grid-column:span 12}
+  .about .cols{grid-template-columns:1fr;gap:40px}
+  .filters .wrap{gap:24px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="sitename" href="#top">yumyumy.cc</a>
+    <div class="modeflag"><span class="chip" aria-hidden="true"></span><span id="modeLabel">纸面 / CMYK</span></div>
+  </div>
+</header>
+
+<div class="masthead" id="top">
+  <div class="wrap">
+    <h1>yumyumy</h1>
+    <p class="tagline">我做两类图像：一类在屏幕里生长，靠代码和时间；一类在纸面上安静下来，靠网格和油墨。</p>
+    <p class="meta-line">上海 · 独立创作与委托项目 · <a href="mailto:hello@yumyumy.cc">hello@yumyumy.cc</a></p>
+  </div>
+</div>
+
+<nav class="filters" aria-label="作品分类">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-filter="all">全部作品<span class="count">10</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-filter="art">计算机艺术<span class="count">5</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-filter="design">平面设计<span class="count">5</span></button>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+    <div class="grid" id="grid"></div>
+
+    <section class="about">
+      <div class="cols">
+        <div>
+          <h2>关于</h2>
+          <p>创作者，工作横跨生成图像与印刷品。白天写着色器和数据可视化，晚上排版、调色、折样。两件事在我这里是同一件：都在找一套规则，然后看它能长出什么。</p>
+          <p>接受品牌视觉、书籍与展览物料、以及互动装置的委托。也长期做自主研究项目，源码大多公开在 GitHub。</p>
+        </div>
+        <div>
+          <h2>联系</h2>
+          <ul class="contact">
+            <li><span>邮件</span><a href="mailto:hello@yumyumy.cc">hello@yumyumy.cc</a></li>
+            <li><span>GitHub</span><a href="https://github.com/" target="_blank" rel="noopener">github.com/yumyumy</a></li>
+            <li><span>Instagram</span><a href="https://instagram.com/" target="_blank" rel="noopener">@yumyumy</a></li>
+            <li><span>简历</span><a href="#top">PDF 下载</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>© 2026 yumyumy</span>
+      <span>本站托管于 GitHub Pages</span>
+    </div>
+  </footer>
+</main>
+
+<!-- 作品详情 -->
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-bar">
+    <div class="wrap">
+      <span class="kind" id="sheetKind"></span>
+      <button class="close" id="closeSheet">关闭</button>
+    </div>
+  </div>
+  <div class="wrap sheet-body">
+    <h2 id="sheetTitle"></h2>
+    <p class="lede" id="sheetLede"></p>
+    <dl class="specs" id="sheetSpecs"></dl>
+    <div id="sheetFrames"></div>
+  </div>
+</div>
+
+<script>
+/* ============ 作品数据：改这里就能换内容 ============ */
+const WORKS = [
+  { id:'art-01', cat:'art', title:'潮汐场', sub:'实时着色器 / WebGL', year:'2026', size:'wide', ratio:'16 / 9', shots:2,
+    lede:'一片按潮汐周期缓慢改写自己的色彩场，每帧由噪声与流体近似共同决定，永不重复。',
+    specs:[['媒介','实时渲染，无限时长'],['工具','GLSL, Three.js'],['展出','线上'],['年份','2026']] },
+  { id:'art-02', cat:'art', title:'噪声花园', sub:'生成图形系列', year:'2025', size:'half', ratio:'4 / 5', shots:3,
+    lede:'用同一组生长规则跑出的 200 张植物结构，从中挑出 12 张成为系列。',
+    specs:[['媒介','生成图像，输出微喷'],['工具','Processing'],['尺寸','420 × 594 mm'],['年份','2025']] },
+  { id:'art-03', cat:'art', title:'像素回声', sub:'互动装置', year:'2025', size:'half', ratio:'4 / 5', shots:2,
+    lede:'观众的动作被延迟 8 秒投回墙面，越靠近，画面分辨率越低。',
+    specs:[['媒介','摄像头，投影'],['工具','openFrameworks'],['展出','群展《延时》'],['年份','2025']] },
+  { id:'art-04', cat:'art', title:'光栅练习', sub:'每日图像 · 30 天', year:'2024', size:'third', ratio:'1 / 1', shots:2,
+    lede:'连续 30 天，每天只改一个参数，看它把画面推到哪里。',
+    specs:[['媒介','静帧序列'],['工具','GLSL'],['数量','30 张'],['年份','2024']] },
+  { id:'art-05', cat:'art', title:'数据风景', sub:'数据可视化', year:'2024', size:'third', ratio:'1 / 1', shots:2,
+    lede:'把一座城市十年的气温记录，画成一条起伏的地平线。',
+    specs:[['媒介','网页交互'],['工具','D3.js'],['数据','公开气象记录'],['年份','2024']] },
+
+  { id:'design-01', cat:'design', title:'春分', sub:'展览主视觉与物料', year:'2026', size:'third', ratio:'1 / 1', shots:2,
+    lede:'为一场关于节气的群展做的整套视觉，从海报到导视，字距随日照长度变化。',
+    specs:[['内容','海报、画册、导视'],['印刷','四色 + 专色'],['客户','某当代艺术空间'],['年份','2026']] },
+  { id:'design-02', cat:'design', title:'城市档案', sub:'书籍设计', year:'2025', size:'wide', ratio:'16 / 9', shots:3,
+    lede:'336 页的城市影像集，用三种纸区分年代，翻起来能摸到时间。',
+    specs:[['开本','185 × 250 mm'],['页数','336 页'],['工艺','裸脊锁线'],['年份','2025']] },
+  { id:'design-03', cat:'design', title:'味觉实验室', sub:'品牌视觉系统', year:'2025', size:'half', ratio:'4 / 5', shots:3,
+    lede:'一家做发酵食品的小工作室，标志用了一套会随时间"发酵"的字形。',
+    specs:[['内容','标志、包装、物料'],['字体','定制字形'],['客户','味觉实验室'],['年份','2025']] },
+  { id:'design-04', cat:'design', title:'九月', sub:'唱片包装', year:'2024', size:'half', ratio:'4 / 5', shots:2,
+    lede:'黑胶内封是一张可拆的折页，展开后是完整的歌词长卷。',
+    specs:[['规格','12 英寸黑胶'],['工艺','烫黑，压凹'],['客户','独立音乐人'],['年份','2024']] },
+  { id:'design-05', cat:'design', title:'字距练习', sub:'字体海报', year:'2024', size:'wide', ratio:'21 / 9', shots:2,
+    lede:'同一句话排 24 遍，只调字距和字重，看语气怎么变。',
+    specs:[['尺寸','594 × 841 mm'],['印刷','丝网，双色'],['数量','24 张'],['年份','2024']] }
+];
+
+const CAT_NAME = { art:'计算机艺术', design:'平面设计' };
+const grid = document.getElementById('grid');
+
+/* 生成占位框：图片放进 images/ 后自动替换灰块 */
+function frame(id, i, ratio){
+  const file = `images/${id}-${String(i).padStart(2,'0')}.jpg`;
+  return `<div class="frame" style="aspect-ratio:${ratio}">
+    <img src="${file}" alt="" loading="lazy" onerror="this.remove()">
+    <div class="slot"><span class="dim">图片位</span><span>${file}</span><span>比例 ${ratio.replace(/\s/g,'')}</span></div>
+  </div>`;
+}
+
+function render(filter){
+  const list = WORKS.filter(w => filter === 'all' || w.cat === filter);
+  grid.innerHTML = list.map(w => `
+    <button class="work ${w.size === 'wide' ? 'wide' : w.size === 'third' ? 'third' : ''}" data-id="${w.id}">
+      ${frame(w.id, 1, w.ratio)}
+      <div class="caption">
+        <h3>${w.title}<span class="sub">${w.sub}</span></h3>
+        <span class="year">${w.year}</span>
+      </div>
+    </button>`).join('');
+}
+
+/* 分类切换：计算机艺术 = 屏幕模式，其余 = 纸面模式 */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t === tab));
+    const f = tab.dataset.filter;
+    document.documentElement.dataset.mode = (f === 'art') ? 'screen' : 'paper';
+    document.getElementById('modeLabel').textContent = (f === 'art') ? '屏幕 / RGB' : '纸面 / CMYK';
+    render(f);
+  });
+});
+
+/* 详情页 */
+const sheet = document.getElementById('sheet');
+let lastFocus = null;
+
+grid.addEventListener('click', e => {
+  const btn = e.target.closest('.work');
+  if (!btn) return;
+  const w = WORKS.find(x => x.id === btn.dataset.id);
+  lastFocus = btn;
+  document.getElementById('sheetKind').textContent = CAT_NAME[w.cat];
+  document.getElementById('sheetTitle').textContent = w.title;
+  document.getElementById('sheetLede').textContent = w.lede;
+  document.getElementById('sheetSpecs').innerHTML = w.specs
+    .map(([k,v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  document.getElementById('sheetFrames').innerHTML =
+    Array.from({length:w.shots}, (_,i) => frame(w.id, i+1, w.ratio)).join('');
+  sheet.hidden = false;
+  document.body.style.overflow = 'hidden';
+  document.getElementById('closeSheet').focus();
+});
+
+function closeSheet(){
+  sheet.hidden = true;
+  document.body.style.overflow = '';
+  if (lastFocus) lastFocus.focus();
+}
+document.getElementById('closeSheet').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+
+document.documentElement.dataset.mode = 'paper';
+render('all');
+</script>
+</body>
+</html>
