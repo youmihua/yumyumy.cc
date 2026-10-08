@@ -1,377 +1,612 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="lemon">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>yumyumy — 计算机艺术 / 平面设计</title>
-<meta name="description" content="yumyumy 的个人作品集：计算机艺术与平面设计。">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<title>yumyumy 鱿米 — 作品集即将上线</title>
+<meta name="description" content="yumyumy（张钰欣）的作品集正在搭建中，即将上线。">
 <style>
 :root{
-  --bg:#E4E4DF;
+  --bg:#FFFFFF;
   --ink:#1A1A18;
   --muted:#6E6E67;
-  --line:rgba(26,26,24,.16);
-  --ph:#CBCBC4;
-  --ph-ink:rgba(26,26,24,.42);
+  --line:rgba(26,26,24,.18);
   --accent:#D6006E;
-  --texture:radial-gradient(circle at center, rgba(26,26,24,.13) 1px, transparent 1.2px);
-  --texture-size:9px 9px;
-  --serif:"Noto Serif SC","Songti SC",Georgia,serif;
+  --cyan:#00B8D9;
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --edge:28px;
+  --panel:rgba(255,255,255,.76);
 }
-html[data-mode="screen"]{
-  --bg:#071016;
-  --ink:#E4F0F3;
-  --muted:#7C959D;
-  --line:rgba(228,240,243,.16);
-  --ph:#15242C;
-  --ph-ink:rgba(228,240,243,.38);
-  --accent:#35E0D0;
-  --texture:repeating-linear-gradient(0deg, rgba(53,224,208,.10) 0 1px, transparent 1px 4px);
-  --texture-size:auto;
+/* 黑底主题 */
+/* 柠檬黄主题 */
+html[data-theme="lemon"]{
+  --bg:#FFF44F;
+  --ink:#1A1A12;
+  --muted:#5E5A1E;
+  --line:rgba(26,26,18,.22);
+  --panel:rgba(255,244,79,.82);
+  --cyan:#2E7BFF;
+  --label-ink:#FFFFFF;
 }
-
+html[data-theme="dark"]{
+  --bg:#000000;
+  --ink:#EDEDEA;
+  --muted:#8A8A85;
+  --line:rgba(237,237,234,.18);
+  --panel:rgba(0,0,0,.62);
+}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--ink);
-  font-family:var(--sans);
-  font-size:16px;
-  line-height:1.65;
-  transition:background-color .45s ease, color .45s ease;
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+#stage{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* 识别框：机器视觉在“看”这只鸽子 */
+#bbox{position:fixed;left:0;top:0;border:1px solid var(--cyan);pointer-events:none;opacity:0;transition:opacity .6s ease}
+#bbox.on{opacity:.9}
+#bbox span{position:absolute;left:-1px;bottom:100%;background:var(--cyan);color:var(--label-ink,#06141A);font:500 10.5px/1 var(--sans);padding:3px 5px;white-space:nowrap;letter-spacing:.02em}
+
+/* 顶部标题 */
+.title{position:fixed;top:24px;left:var(--edge);right:var(--edge);text-align:center;pointer-events:none;z-index:5}
+.title p{margin:0;font:400 30px/1.2 var(--sans);color:var(--muted);letter-spacing:.01em;white-space:nowrap}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.about-trigger .cn{margin-left:.4em}
+.title p .wip{font-size:.667em;font-weight:700;color:var(--cyan)}
+.title p b{font-weight:500;color:var(--cyan);margin-right:.3em}
+.dots i{font-style:normal;animation:dot 1.4s infinite both}
+.dots i:nth-child(2){animation-delay:.2s}
+.dots i:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:.15}40%{opacity:1}}
+
+/* 底部角落 */
+.corner{position:fixed;bottom:26px;z-index:6;font-size:14px;line-height:1.35}
+.corner.left{left:var(--edge)}
+.corner.right{right:var(--edge);text-align:right}
+
+.about-trigger{
+  appearance:none;background:none;border:0;margin:0;padding:0 0 1px;cursor:pointer;color:inherit;
+  font:inherit;line-height:inherit;border-bottom:1px solid transparent;
+}
+.about-trigger:hover,.about-corner:hover .about-trigger,.about-corner.open .about-trigger{color:var(--accent);border-color:var(--accent)}
+.bio{
+  position:absolute;right:0;bottom:calc(100% + 18px);text-align:left;width:min(440px,calc(100vw - 2*var(--edge)));
+  padding:20px 22px 18px;background:var(--panel);
+  -webkit-backdrop-filter:blur(6px) saturate(1.1);backdrop-filter:blur(6px) saturate(1.1);
+  border:1px solid var(--line);
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .28s ease,transform .28s ease;
+  max-height:calc(100vh - 180px);overflow-y:auto;
+}
+/* 让鼠标能从 About 移进简介而不断开 */
+.bio::after{content:"";position:absolute;left:0;right:0;top:100%;height:20px}
+.about-corner:hover .bio,.about-corner:focus-within .bio,.about-corner.open .bio{opacity:1;transform:none;pointer-events:auto}
+.bio h2{margin:0 0 2px;font-family:var(--sans);font-size:18px;font-weight:600}
+.bio .en{margin:0 0 14px;font-size:12.5px;color:var(--muted)}
+.bio p.text{margin:0;font-size:13.5px;line-height:1.75}
+.bio dl{margin:16px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.55;display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
+.bio dt{color:var(--muted)}
+.bio dd{margin:0}
+.bio a{border-bottom:1px solid var(--line)}
+.bio a:hover{color:var(--accent);border-color:var(--accent)}
+
+.social{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;align-items:flex-start}
+.social a,.social .plain{display:inline-flex;gap:10px;align-items:baseline;padding-bottom:1px;border-bottom:1px solid transparent}
+.social a:hover{color:var(--accent);border-color:var(--accent)}
+.social small{font:11px var(--sans);color:var(--muted);letter-spacing:.04em}
+
+.hint{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);font:11px var(--sans);color:var(--muted);letter-spacing:.08em;pointer-events:none;transition:opacity .8s ease;z-index:4;white-space:nowrap}
+.hint.gone{opacity:0}
+
+.loading{position:fixed;inset:0;display:grid;place-items:center;font:12px var(--sans);color:var(--muted);pointer-events:none;transition:opacity .6s}
+.loading.gone{opacity:0}
+
+@media (max-width:720px){
+  :root{--edge:20px}
+  .title{top:20px}
+  .title p{font-size:22px}
+  .corner{bottom:20px}
+  .social small{display:none}
+  .social #xhs small{display:inline}
+  .hint{display:none}
+  .bio{bottom:calc(100% + 14px);max-height:calc(100vh - 200px)}
 }
 @media (prefers-reduced-motion:reduce){
-  *{transition:none !important; animation:none !important}
-}
-a{color:inherit}
-:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
-
-.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
-
-/* ---------- 顶栏 ---------- */
-.topbar{
-  position:sticky;top:0;z-index:40;
-  background:var(--bg);
-  border-bottom:1px solid var(--line);
-  transition:background-color .45s ease,border-color .45s ease;
-}
-.topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:52px}
-.sitename{font-family:var(--serif);font-weight:600;letter-spacing:.02em;text-decoration:none}
-.aboutlink{font-size:14px;text-decoration:none;color:var(--muted);border-bottom:1px solid transparent;padding-bottom:2px}
-.aboutlink:hover{color:var(--ink);border-color:var(--accent)}
-
-/* ---------- 报头 ---------- */
-.masthead{position:relative;padding:96px 0 68px;overflow:hidden}
-.masthead::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:var(--texture);background-size:var(--texture-size);
-  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.9),transparent 72%);
-  mask-image:linear-gradient(180deg,rgba(0,0,0,.9),transparent 72%);
-}
-.masthead .wrap{position:relative;z-index:1}
-h1{
-  font-family:var(--serif);font-weight:700;
-  font-size:clamp(56px,12vw,148px);
-  line-height:.92;letter-spacing:-.035em;margin:0;
-}
-
-/* ---------- 分类切换 ---------- */
-.filters{
-  position:sticky;top:52px;z-index:30;
-  background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-  transition:background-color .45s ease,border-color .45s ease;
-}
-.filters .wrap{display:flex;gap:34px;align-items:baseline;height:58px;overflow-x:auto;scrollbar-width:none}
-.filters .wrap::-webkit-scrollbar{display:none}
-.tab{
-  appearance:none;background:none;border:0;padding:0;cursor:pointer;
-  font-family:var(--serif);font-size:19px;font-weight:600;color:var(--muted);
-  white-space:nowrap;position:relative;transition:color .2s ease;
-}
-.tab:hover{color:var(--ink)}
-.tab[aria-selected="true"]{color:var(--ink)}
-.tab[aria-selected="true"]::after{
-  content:"";position:absolute;left:0;right:0;bottom:-19px;height:2px;background:var(--accent);
-}
-.tab .count{font-family:var(--sans);font-size:11px;font-weight:400;vertical-align:super;margin-left:4px;color:var(--muted)}
-
-/* ---------- 作品网格 ---------- */
-main{padding:52px 0 0}
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:52px 32px}
-.work{grid-column:span 6;display:flex;flex-direction:column;gap:14px;cursor:pointer;border:0;background:none;padding:0;text-align:left;color:inherit;font:inherit}
-.work.wide{grid-column:span 12}
-.work.third{grid-column:span 4}
-
-.frame{
-  position:relative;width:100%;background:var(--ph);
-  border:1px solid var(--line);overflow:hidden;
-  transition:background-color .45s ease;
-}
-.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.frame .slot{
-  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
-  padding:16px;gap:3px;color:var(--ph-ink);font-size:11.5px;line-height:1.5;letter-spacing:.02em;
-}
-.frame .slot .dim{font-family:var(--serif);font-size:14px}
-.frame::before{
-  content:"";position:absolute;top:14px;right:14px;width:16px;height:16px;
-  border:1px solid var(--ph-ink);border-radius:50%;
-}
-.frame::after{
-  content:"";position:absolute;top:21px;right:7px;width:30px;height:1px;background:var(--ph-ink);
-}
-.work:hover .frame,.work:focus-visible .frame{border-color:var(--accent)}
-
-.caption{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--line);padding-top:12px}
-.caption h3{font-family:var(--serif);font-size:19px;font-weight:600;margin:0;line-height:1.35}
-.caption .sub{display:block;font-family:var(--sans);font-size:13px;font-weight:400;color:var(--muted);margin-top:4px}
-.caption .year{font-size:13px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
-
-/* ---------- 关于 ---------- */
-.about{margin-top:104px;border-top:1px solid var(--line);padding:64px 0 0;scroll-margin-top:112px}
-.about h2{font-family:var(--serif);font-size:26px;font-weight:600;margin:0 0 22px}
-.bio{margin:0 0 54px;max-width:36em;font-size:15.5px}
-.cv-group{margin-bottom:46px}
-.cv-group h3{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--muted);margin:0 0 4px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.cv-row{display:grid;grid-template-columns:1.15fr 1fr;gap:24px;padding:16px 0;border-bottom:1px solid var(--line)}
-.cv-row .place,.cv-row .what{font-family:var(--serif);font-size:16.5px;line-height:1.45}
-.cv-row span{display:block;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45}
-.cv-row a{text-decoration:none;border-bottom:1px solid var(--line)}
-.cv-row a:hover{border-color:var(--accent);color:var(--accent)}
-
-footer{margin-top:80px;border-top:1px solid var(--line);padding:22px 0 46px;font-size:12.5px;color:var(--muted)}
-footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-
-/* ---------- 详情弹层 ---------- */
-.sheet[hidden]{display:none}
-.sheet{
-  position:fixed;inset:0;z-index:60;background:var(--bg);
-  overflow-y:auto;padding:0 0 80px;
-}
-.sheet-bar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:2}
-.sheet-bar .wrap{display:flex;justify-content:space-between;align-items:center;height:52px}
-.sheet-bar .kind{font-size:13px;color:var(--muted)}
-.close{appearance:none;background:none;border:0;cursor:pointer;color:inherit;font:inherit;font-size:14px;padding:6px 0}
-.close:hover{color:var(--accent)}
-.sheet-body{padding-top:44px}
-.sheet-body h2{font-family:var(--serif);font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.1}
-.sheet-body .lede{font-family:var(--serif);font-size:18px;max-width:32em;margin:22px 0 0}
-.specs{display:flex;flex-wrap:wrap;gap:0 44px;margin:30px 0 40px;padding-top:18px;border-top:1px solid var(--line)}
-.specs div{padding:8px 0}
-.specs dt{font-size:12px;color:var(--muted);margin-bottom:3px}
-.specs dd{margin:0;font-family:var(--serif);font-size:16px}
-.sheet .frame + .frame{margin-top:22px}
-.watch{display:inline-block;margin:0 0 40px;font-size:15px;text-decoration:none;border-bottom:1px solid var(--accent);padding-bottom:2px}
-.watch:hover{color:var(--accent)}
-
-@media (max-width:820px){
-  .wrap{padding:0 20px}
-  .masthead{padding:64px 0 46px}
-  .grid{gap:40px 20px}
-  .work,.work.wide,.work.third{grid-column:span 12}
-  .about .cols{grid-template-columns:1fr;gap:40px}
-  .cv-row{grid-template-columns:1fr;gap:6px}
-  .filters .wrap{gap:24px}
+  .bio,#bbox,.hint{transition:none}
 }
 </style>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="wrap">
-    <a class="sitename" href="#top">yumyumy.cc</a>
-    <a class="aboutlink" href="#about">About</a>
-  </div>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="bbox" aria-hidden="true"><span id="bboxLabel">pigeon 0.92</span></div>
+<div class="loading" id="loading">loading pigeon…</div>
+
+<header class="title">
+  <h1 class="sr-only">Yumy 鱿米</h1>
+  <p><b>coming soon</b><span class="wip">施工中<span class="dots"><i>.</i><i>.</i><i>.</i></span></span></p>
 </header>
 
-<div class="masthead" id="top">
-  <div class="wrap">
-    <h1>yumyumy</h1>
+<div class="hint" id="hint">移动鼠标，让机器读一读这只鸽子</div>
+
+<div class="corner right about-corner" id="aboutCorner">
+  <div class="bio" id="bio" role="region" aria-label="作者简介">
+    <h2>张钰欣 Yumy</h2>
+    <p class="en">平面设计师 · Computational Artist</p>
+    <p class="text">游走于计算系统与动态身体之间的艺术家兼平面设计师。她的创作探讨机器视觉如何将身体转化为可被解读的数据，并审视这一过程中发生的遗失、扭曲与重构。她运用姿态估计、三维动画及动态影像等媒介，把识别系统产生的“故障”——僵滞的关节、误读的肢体、经由插值生成的身体——视为某种无法被量化之物的显现，而非亟待修正的错误。近期作品延伸至人类与非人类主体：拒绝被分类的城市鸽群，以及由自身影子的数据所驱动的身体。同时做书籍、展览物料与品牌视觉设计。</p>
+    <dl>
+      <dt>MFA</dt><dd>Computational Arts, Goldsmiths, University of London</dd>
+      <dt>BA</dt><dd>Graphic Design, 武汉纺织大学 伯明翰时尚创意学院</dd>
+      <dt>邮箱</dt><dd><a href="mailto:yuxinzhang.yumy@gmail.com">yuxinzhang.yumy@gmail.com</a></dd>
+    </dl>
   </div>
+  <button class="about-trigger" id="aboutBtn" aria-expanded="false" aria-controls="bio">Yumy<span class="cn">鱿米</span></button>
 </div>
 
-<nav class="filters" aria-label="作品分类">
-  <div class="wrap" role="tablist">
-    <button class="tab" role="tab" aria-selected="true" data-filter="design">平面设计<span class="count">5</span></button>
-    <button class="tab" role="tab" aria-selected="false" data-filter="art">计算机艺术<span class="count">4</span></button>
-  </div>
+<nav class="corner left" aria-label="社交媒体">
+  <ul class="social">
+    <li><a href="https://www.behance.net/yumyzhang" target="_blank" rel="noopener">Behance <small>/yumyzhang</small></a></li>
+    <li><a href="https://www.instagram.com/yumy_zhang/" target="_blank" rel="noopener">Instagram <small>@yumy_zhang</small></a></li>
+    <li id="xhs"><span class="plain">小红书 <small>@吃鱼米咩</small></span></li>
+  </ul>
 </nav>
 
-<main>
-  <div class="wrap">
-    <div class="grid" id="grid"></div>
+<script type="module">
+import * as THREE from 'three';
 
-    <section class="about" id="about">
-      <h2>About</h2>
-      <p class="bio">张钰欣（Yumy），平面设计师, Computational Artist。是一位游走于计算系统与动态身体之间的艺术家兼平面设计师。她的创作探讨了机器视觉如何将身体转化为可被解读的数据，并审视了这一过程中所发生的遗失、扭曲与重构。她运用姿态估计、三维动画及动态影像等媒介进行创作，将识别系统产生的“故障”——如僵滞的关节、误读的肢体或经由插值生成的身体形态——视为某种无法被量化的特质的显现，而非亟待修正的错误。她近期的作品将这一议题延伸至人类与非人类主体，涵盖了拒绝被分类的城市鸽群，以及由自身影子提取的数据所驱动的身体形态。同时做书籍、展览物料与品牌视觉的设计工作。</p>
+/* ================= 可调参数 ================= */
+const CONFIG = {
+  modelUrl: 'models/pigeon.glb', // 放一个带飞行动画的 .glb 到这里就会替换内置鸽子
+  xiaohongshuUrl: '',            // 填上你的小红书主页链接后，“小红书”就会变成可点击
+  cell: 9,                       // ASCII 字符格大小（像素）
+  brush: 120,                    // 鼠标擦出的 ASCII 区域半径（像素）
+  chars: ' .,:;-=+*cox%#@',      // 由浅到深
+  theme: 'lemon',                // 'lemon' 柠檬黄 / 'dark' 黑底 / 'light' 白底
+};
 
-      <div class="cv">
-        <div class="cv-group">
-          <h3>教育</h3>
-          <div class="cv-row">
-            <div class="place">伦敦大学金史密斯学院<span>Goldsmiths, University of London</span></div>
-            <div class="what">计算艺术 硕士<span>MFA Computational Arts</span></div>
-          </div>
-          <div class="cv-row">
-            <div class="place">武汉纺织大学 伯明翰时尚创意学院<span>Wuhan Textile University, Birmingham Institute of Fashion and Creative Art</span></div>
-            <div class="what">平面设计 学士<span>BA Graphic Design</span></div>
-          </div>
-        </div>
-
-        <div class="cv-group">
-          <h3>联系</h3>
-          <div class="cv-row">
-            <div class="place">邮箱</div>
-            <div class="what"><a href="mailto:yuxinzhang.yumy@gmail.com">yuxinzhang.yumy@gmail.com</a></div>
-          </div>
-          <div class="cv-row">
-            <div class="place">Instagram</div>
-            <div class="what"><a href="https://instagram.com/yumy_zhang" target="_blank" rel="noopener">@yumy_zhang</a></div>
-          </div>
-          <div class="cv-row">
-            <div class="place">小红书</div>
-            <div class="what">@吃鱼米咩</div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <footer>
-    <div class="wrap">
-      <span>© 2026 yumyumy</span>
-      <span>本站托管于 GitHub Pages</span>
-    </div>
-  </footer>
-</main>
-
-<!-- 作品详情 -->
-<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-  <div class="sheet-bar">
-    <div class="wrap">
-      <span class="kind" id="sheetKind"></span>
-      <button class="close" id="closeSheet">关闭</button>
-    </div>
-  </div>
-  <div class="wrap sheet-body">
-    <h2 id="sheetTitle"></h2>
-    <p class="lede" id="sheetLede"></p>
-    <dl class="specs" id="sheetSpecs"></dl>
-    <div id="sheetLink"></div>
-    <div id="sheetFrames"></div>
-  </div>
-</div>
-
-<script>
-/* ============ 作品数据：改这里就能换内容 ============ */
-const WORKS = [
-  { id:'afterimage', cat:'art', title:'Afterimage', sub:'四频道录像装置', year:'2026', size:'wide', ratio:'16 / 9', shots:4,
-    link:'https://youtu.be/MZ6N9IvDjjc', linkText:'观看影像',
-    lede:'影子被记录下来，被机器视觉读取，再作为数据返回去驱动它原本所属的身体。一道比来源活得更久、又回头指挥它的痕迹。',
-    specs:[['媒介','四频道录像装置，12′41″，有声；亚克力打印'],['年份','2026']] },
-  { id:'unarchivable', cat:'art', title:'The Unarchivable', sub:'影像与机器学习', year:'2025', size:'half', ratio:'4 / 5', shots:3,
-    link:'https://vimeo.com/1111489700', linkText:'观看影像',
-    lede:'用两只鸽子训练识别模型，建立一个不断生长的档案，记录机器如何识别、误认并想象它们。档案给予鸽子一种主体性，同时也划定了什么可以被记住。',
-    specs:[['媒介','影像；自建数据集与检测、分类模型'],['年份','2025']] },
-  { id:'learning-to-fold', cat:'art', title:'Learning to Fold', sub:'机械装置', year:'2025', size:'half', ratio:'4 / 5', shots:3,
-    link:'https://vimeo.com/1144196389', linkText:'观看影像',
-    lede:'鸽子振翅的瞬间，识别会短暂失效。这件作品做了一只简化的机械翼，用结构和运动的复杂性去试探机器视觉的边界——包括它卡住和抖动的时候。',
-    specs:[['媒介','机械装置与影像记录；目标检测测试'],['年份','2025']] },
-  { id:'when-i-became-a-bug', cat:'art', title:'When I Became a Bug', sub:'多通道影像', year:'2025', size:'wide', ratio:'16 / 9', shots:3,
-    link:'https://vimeo.com/1146144051', linkText:'观看影像',
-    lede:'身体被拆成互不同步的片段分别拍摄，再由机器视觉缝合起来。看上去完整的动作，其实是系统不停插值、修正和猜测的结果。',
-    specs:[['媒介','多通道影像合成，实时姿态追踪'],['年份','2025']] },
-
-  { id:'design-01', cat:'design', title:'春分', sub:'展览主视觉与物料', year:'2026', size:'third', ratio:'1 / 1', shots:2,
-    lede:'为一场关于节气的群展做的整套视觉，从海报到导视，字距随日照长度变化。',
-    specs:[['内容','海报、画册、导视'],['印刷','四色 + 专色'],['客户','某当代艺术空间'],['年份','2026']] },
-  { id:'design-02', cat:'design', title:'城市档案', sub:'书籍设计', year:'2025', size:'wide', ratio:'16 / 9', shots:3,
-    lede:'336 页的城市影像集，用三种纸区分年代，翻起来能摸到时间。',
-    specs:[['开本','185 × 250 mm'],['页数','336 页'],['工艺','裸脊锁线'],['年份','2025']] },
-  { id:'design-03', cat:'design', title:'味觉实验室', sub:'品牌视觉系统', year:'2025', size:'half', ratio:'4 / 5', shots:3,
-    lede:'一家做发酵食品的小工作室，标志用了一套会随时间"发酵"的字形。',
-    specs:[['内容','标志、包装、物料'],['字体','定制字形'],['客户','味觉实验室'],['年份','2025']] },
-  { id:'design-04', cat:'design', title:'九月', sub:'唱片包装', year:'2024', size:'half', ratio:'4 / 5', shots:2,
-    lede:'黑胶内封是一张可拆的折页，展开后是完整的歌词长卷。',
-    specs:[['规格','12 英寸黑胶'],['工艺','烫黑，压凹'],['客户','独立音乐人'],['年份','2024']] },
-  { id:'design-05', cat:'design', title:'字距练习', sub:'字体海报', year:'2024', size:'wide', ratio:'21 / 9', shots:2,
-    lede:'同一句话排 24 遍，只调字距和字重，看语气怎么变。',
-    specs:[['尺寸','594 × 841 mm'],['印刷','丝网，双色'],['数量','24 张'],['年份','2024']] }
-];
-
-const CAT_NAME = { art:'计算机艺术', design:'平面设计' };
-const grid = document.getElementById('grid');
-
-/* 生成占位框：图片放进 images/ 后自动替换灰块 */
-function frame(id, i, ratio){
-  const file = `images/${id}-${String(i).padStart(2,'0')}.jpg`;
-  return `<div class="frame" style="aspect-ratio:${ratio}">
-    <img src="${file}" alt="" loading="lazy" onerror="this.remove()">
-    <div class="slot"><span class="dim">图片位</span><span>${file}</span><span>比例 ${ratio.replace(/\s/g,'')}</span></div>
-  </div>`;
+/* 小红书链接 */
+if (CONFIG.xiaohongshuUrl) {
+  document.getElementById('xhs').innerHTML =
+    `<a href="${CONFIG.xiaohongshuUrl}" target="_blank" rel="noopener">小红书 <small>@吃鱼米咩</small></a>`;
 }
 
-function render(filter){
-  const list = WORKS.filter(w => filter === 'all' || w.cat === filter);
-  grid.innerHTML = list.map(w => `
-    <button class="work ${w.size === 'wide' ? 'wide' : w.size === 'third' ? 'third' : ''}" data-id="${w.id}">
-      ${frame(w.id, 1, w.ratio)}
-      <div class="caption">
-        <h3>${w.title}<span class="sub">${w.sub}</span></h3>
-        <span class="year">${w.year}</span>
-      </div>
-    </button>`).join('');
-}
-
-/* 分类切换：计算机艺术 = 屏幕模式，其余 = 纸面模式 */
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t === tab));
-    const f = tab.dataset.filter;
-    document.documentElement.dataset.mode = (f === 'art') ? 'screen' : 'paper';
-    render(f);
-  });
+/* About：桌面悬停，触屏点按 */
+const aboutCorner = document.getElementById('aboutCorner');
+const aboutBtn = document.getElementById('aboutBtn');
+aboutBtn.addEventListener('click', () => {
+  const open = aboutCorner.classList.toggle('open');
+  aboutBtn.setAttribute('aria-expanded', open);
 });
+aboutCorner.addEventListener('mouseenter', () => aboutBtn.setAttribute('aria-expanded', 'true'));
+aboutCorner.addEventListener('mouseleave', () => { if (!aboutCorner.classList.contains('open')) aboutBtn.setAttribute('aria-expanded', 'false'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { aboutCorner.classList.remove('open'); aboutBtn.setAttribute('aria-expanded','false'); } });
+document.addEventListener('pointerdown', e => { if (!aboutCorner.contains(e.target)) aboutCorner.classList.remove('open'); });
 
-/* 详情页 */
-const sheet = document.getElementById('sheet');
-let lastFocus = null;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-grid.addEventListener('click', e => {
-  const btn = e.target.closest('.work');
-  if (!btn) return;
-  const w = WORKS.find(x => x.id === btn.dataset.id);
-  lastFocus = btn;
-  document.getElementById('sheetKind').textContent = CAT_NAME[w.cat];
-  document.getElementById('sheetTitle').textContent = w.title;
-  document.getElementById('sheetLede').textContent = w.lede;
-  document.getElementById('sheetSpecs').innerHTML = w.specs
-    .map(([k,v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
-  document.getElementById('sheetLink').innerHTML = w.link
-    ? `<a class="watch" href="${w.link}" target="_blank" rel="noopener">${w.linkText || '观看影像'}</a>`
-    : '';
-  document.getElementById('sheetFrames').innerHTML =
-    Array.from({length:w.shots}, (_,i) => frame(w.id, i+1, w.ratio)).join('');
-  sheet.hidden = false;
-  document.body.style.overflow = 'hidden';
-  document.getElementById('closeSheet').focus();
-});
+/* ================= 渲染器 ================= */
+const canvas = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const DPR = Math.min(devicePixelRatio || 1, 2);
+renderer.setPixelRatio(DPR);
 
-function closeSheet(){
-  sheet.hidden = true;
-  document.body.style.overflow = '';
-  if (lastFocus) lastFocus.focus();
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+camera.position.set(0, 0.4, 11);
+camera.lookAt(0, 0, 0);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xb8d4dc, 1.8));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(3, 6, 5);
+scene.add(sun);
+const rim = new THREE.DirectionalLight(0xdfe8ff, 0.8);
+rim.position.set(-5, 2, -4);
+scene.add(rim);
+// 黑底时加强轮廓光，让深色飞羽不被背景吞掉
+if (CONFIG.theme === 'dark') { rim.intensity = 2.2; rim.position.set(-4, 3, -5); }
+
+/* 场景先画到离屏贴图，再由 ASCII 着色器合成 */
+const rt = new THREE.WebGLRenderTarget(1, 1, { samples: 4 });
+
+/* ================= 字符图集 ================= */
+function makeGlyphAtlas(chars) {
+  const s = 64, c = document.createElement('canvas');
+  c.width = s * chars.length; c.height = s;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height);
+  g.fillStyle = '#fff';
+  g.font = `600 ${s * 0.86}px ui-monospace, Menlo, Consolas, monospace`;
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  [...chars].forEach((ch, i) => g.fillText(ch, i * s + s / 2, s / 2 + 2));
+  const t = new THREE.CanvasTexture(c);
+  t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  return t;
 }
-document.getElementById('closeSheet').addEventListener('click', closeSheet);
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+const glyphTex = makeGlyphAtlas(CONFIG.chars);
 
-document.documentElement.dataset.mode = 'paper';
-render('design');
+/* ================= 鼠标轨迹遮罩 ================= */
+const MASK_SCALE = 0.25;
+const maskCanvas = document.createElement('canvas');
+const mctx = maskCanvas.getContext('2d');
+const maskTex = new THREE.CanvasTexture(maskCanvas);
+maskTex.minFilter = THREE.LinearFilter; maskTex.generateMipmaps = false;
+
+let pointer = { x: -9999, y: -9999, px: -9999, py: -9999, active: false, nx: 0, ny: 0 };
+let energy = 0;
+
+function stamp(x, y, r, a) {
+  const g = mctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(255,255,255,${a})`);
+  g.addColorStop(0.55, `rgba(255,255,255,${a * 0.75})`);
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  mctx.fillStyle = g;
+  mctx.beginPath(); mctx.arc(x, y, r, 0, Math.PI * 2); mctx.fill();
+}
+
+function updateMask(dt) {
+  // 渐隐
+  mctx.globalCompositeOperation = 'source-over';
+  mctx.fillStyle = `rgba(0,0,0,${Math.min(1, dt * 1.6)})`;
+  mctx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+  if (pointer.active && pointer.px > -9000) {
+    const dx = pointer.x - pointer.px, dy = pointer.y - pointer.py;
+    const dist = Math.hypot(dx, dy);
+    energy = Math.min(1, energy * 0.9 + dist / 60);
+    if (dist > 0.5) {
+      const r = (CONFIG.brush * (0.55 + energy * 0.6)) * MASK_SCALE;
+      const steps = Math.max(1, Math.ceil(dist * MASK_SCALE / (r * 0.3)));
+      mctx.globalCompositeOperation = 'lighter';
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        stamp((pointer.px + dx * t) * MASK_SCALE, (pointer.py + dy * t) * MASK_SCALE, r, 0.22);
+      }
+    }
+  }
+  pointer.px = pointer.x; pointer.py = pointer.y;
+  maskTex.needsUpdate = true;
+}
+
+/* ================= ASCII 合成着色器 ================= */
+const THEMES = {
+  lemon: { bg: '#FFF44F', ink: '#1A1A12', faint: '#C2B52A', invert: 0, cyan: '#2E7BFF' },
+  light: { bg: '#FFFFFF', ink: '#1A1A18', faint: '#A3A39B', invert: 0 },
+  dark:  { bg: '#000000', ink: '#EDEDEA', faint: '#4A4A47', invert: 1 },
+};
+const TH = THEMES[CONFIG.theme] || THEMES.dark;
+document.documentElement.dataset.theme = CONFIG.theme;
+const bgColor = new THREE.Color(TH.bg);
+const post = new THREE.ShaderMaterial({
+  uniforms: {
+    tScene: { value: rt.texture },
+    tGlyph: { value: glyphTex },
+    tMask: { value: maskTex },
+    res: { value: new THREE.Vector2() },
+    cell: { value: CONFIG.cell * DPR },
+    nChars: { value: CONFIG.chars.length },
+    bg: { value: bgColor },
+    ink: { value: new THREE.Color(TH.ink) },
+    faint: { value: new THREE.Color(TH.faint) },
+    invert: { value: TH.invert },
+    accent: { value: new THREE.Color(TH.cyan || '#00B8D9') },
+    time: { value: 0 },
+  },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+  fragmentShader: `
+    uniform sampler2D tScene, tGlyph, tMask;
+    uniform vec2 res; uniform float cell, nChars, time, invert;
+    uniform vec3 bg, ink, faint, accent;
+    varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float glyph(float idx, vec2 local){
+      vec2 uv = vec2((idx + clamp(local.x, 0.0, 1.0)) / nChars, local.y);
+      return texture2D(tGlyph, uv).r;
+    }
+    void main(){
+      vec4 s = texture2D(tScene, vUv);
+      vec3 base = mix(bg, s.rgb, s.a);
+
+      vec2 px = vUv * res;
+      vec2 c = floor(px / cell);
+      vec2 cuv = (c + 0.5) * cell / res;
+      vec2 local = fract(px / cell);
+      local = vec2(local.x * 1.25 - 0.125, local.y);       // 字符略窄于格子
+
+      float m = texture2D(tMask, cuv).r;                    // 按格采样 → 方块边缘
+      m = smoothstep(0.06, 0.5, m);
+      vec3 outc = base;
+      if (m > 0.001) {
+      vec4 sc = texture2D(tScene, cuv);
+      vec3 srgb = pow(max(sc.rgb, 0.0), vec3(1.0/2.2));
+      float lum = dot(srgb, vec3(0.299, 0.587, 0.114));
+
+      vec3 col; float g;
+      if (sc.a > 0.4) {
+        // 鸽子：越暗字符越密
+        float d = clamp(lum * 1.35 + 0.05, 0.0, 1.0);          // 越亮，背景色字符越密
+        float idx = floor(mix(3.0, nChars - 1.0, d) + 0.5);
+        g = glyph(idx, local);
+        // 偶尔误读一个字符
+        float flick = step(0.985, hash(c + floor(time * 9.0)));
+        vec3 charCol = mix(bg, accent, flick);                 // 字符 = 背景色（偶尔误读成青色）
+        vec3 fill = sc.rgb * 0.85;                             // 字符底下是鸽子的颜色
+        col = mix(fill, charCol, g);
+      } else {
+        // 背景：稀疏的扫描点阵
+        float h = hash(c + floor(time * 2.0) * 0.17);
+        float idx = h > 0.93 ? 2.0 : (h > 0.55 ? 1.0 : 0.0);
+        g = glyph(idx, local);
+        col = mix(bg, faint, g * 0.9);
+      }
+      outc = mix(base, col, m);
+      }
+      gl_FragColor = vec4(outc, 1.0);
+      #include <colorspace_fragment>
+    }
+  `,
+  depthTest: false, depthWrite: false,
+});
+const postScene = new THREE.Scene();
+const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post));
+
+/* ================= 程序生成的低多边形鸽子 ================= */
+function buildPigeon() {
+  const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.75, metalness: 0.05, side: THREE.DoubleSide, ...extra });
+  // 配色参考：深海军蓝背、宝蓝翅膀与头、天蓝→浅青渐变的胸腹、红眼圈、粉色喙
+  const M = {
+    body:  mat('#ffffff', { vertexColors: true }),
+    head:  mat('#1F4FA0'),
+    neck:  mat('#ffffff', { vertexColors: true }),
+    wing:  mat('#1F4FA0'),
+    bar:   mat('#0C3354'),
+    prim:  mat('#0C3354'),
+    tail:  mat('#1F4FA0'),
+    beak:  mat('#F23FC6', { roughness: 0.5 }),
+    cere:  mat('#F9C8EC'),
+    eye:   mat('#F2321C', { roughness: 0.4 }),
+    pupil: mat('#0C3354'),
+  };
+  // 按高度给几何体刷渐变：上方天蓝，下方浅青
+  const gradient = (geo, top, bottom, y0 = -1, y1 = 1) => {
+    const a = new THREE.Color(top), b = new THREE.Color(bottom), c = new THREE.Color();
+    const pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i++) {
+      const t = THREE.MathUtils.clamp((pos.getY(i) - y0) / (y1 - y0), 0, 1);
+      c.copy(b).lerp(a, t); col.set([c.r, c.g, c.b], i * 3);
+    }
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    return geo;
+  };
+  const root = new THREE.Group();     // 前方 = +x，翼展 = ±z
+  const bob = new THREE.Group(); root.add(bob);
+
+  const sphere = (r, w = 10, h = 8) => new THREE.SphereGeometry(r, w, h);
+
+  const body = new THREE.Mesh(gradient(sphere(1, 12, 9), '#3E8CD2', '#BFE2E3'), M.body);
+  body.scale.set(1.55, 0.78, 0.8); bob.add(body);
+
+  const neck = new THREE.Mesh(gradient(sphere(0.6, 10, 8), '#4A98D4', '#A9D6DE', -0.6, 0.6), M.neck);
+  neck.position.set(0.95, 0.3, 0); neck.scale.set(1, 1, 0.92); bob.add(neck);
+
+  const head = new THREE.Mesh(sphere(0.42, 10, 8), M.head);
+  head.position.set(1.5, 0.62, 0); bob.add(head);
+
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.085, 0.36, 6), M.beak);
+  beak.rotation.z = -Math.PI / 2; beak.position.set(1.98, 0.56, 0); bob.add(beak);
+  const cere = new THREE.Mesh(sphere(0.08, 6, 5), M.cere);
+  cere.position.set(1.84, 0.63, 0); cere.scale.set(1.2, 0.7, 1); bob.add(cere);
+
+  for (const s of [1, -1]) {
+    const eye = new THREE.Mesh(sphere(0.1, 8, 6), M.eye);
+    eye.position.set(1.66, 0.72, s * 0.3); bob.add(eye);
+    const pupil = new THREE.Mesh(sphere(0.055, 6, 5), M.pupil);
+    pupil.position.set(1.69, 0.73, s * 0.385); bob.add(pupil);
+  }
+
+  // 尾羽扇面 + 深色尾端
+  const shapeGeo = (pts) => {
+    const sh = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y)));
+    const g = new THREE.ShapeGeometry(sh);
+    g.rotateX(Math.PI / 2);           // shape 的 y → 世界 z
+    return g;
+  };
+  const tailPivot = new THREE.Group();
+  tailPivot.position.set(-1.2, 0.05, 0);           // 尾根处为摆动轴
+  bob.add(tailPivot);
+  const tail = new THREE.Mesh(shapeGeo([[-1.2, -0.28], [-2.35, -0.55], [-2.5, 0], [-2.35, 0.55], [-1.2, 0.28]]), M.tail);
+  tail.position.set(1.2, 0, 0); tailPivot.add(tail);
+  const tailTip = new THREE.Mesh(shapeGeo([[-2.15, -0.5], [-2.37, -0.56], [-2.52, 0], [-2.37, 0.56], [-2.15, 0.5], [-2.3, 0]]), M.bar);
+  tailTip.position.set(1.2, 0.012, 0); tailPivot.add(tailTip);
+
+  // 翅膀：内翼（带两道深色翼斑）+ 外翼（深色初级飞羽，锯齿后缘）
+  const wings = [];
+  for (const s of [1, -1]) {
+    const shoulder = new THREE.Group();
+    shoulder.position.set(0.25, 0.38, s * 0.55);
+    shoulder.scale.setScalar(0.85);
+    bob.add(shoulder);
+
+    const innerG = shapeGeo([[0.55, 0], [0.48, 0.8], [0.32, 1.65], [-0.7, 1.55], [-0.95, 0.75], [-0.85, 0]]);
+    const bar1 = shapeGeo([[-0.28, 0.05], [-0.38, 1.5], [-0.5, 1.5], [-0.42, 0.05]]);
+    const bar2 = shapeGeo([[-0.6, 0.05], [-0.68, 1.45], [-0.8, 1.42], [-0.74, 0.05]]);
+    const outerG = shapeGeo([
+      [0.32, 0], [0.18, 0.9], [-0.15, 1.75], [-0.42, 2.05], [-0.55, 1.78], [-0.7, 1.9], [-0.78, 1.55],
+      [-0.92, 1.6], [-0.95, 1.2], [-1.05, 1.18], [-1.0, 0.75], [-1.08, 0.6], [-0.95, 0.25], [-0.7, 0]
+    ]);
+    if (s < 0) [innerG, bar1, bar2, outerG].forEach(g => g.scale(1, 1, -1));
+
+    const inner = new THREE.Mesh(innerG, M.wing);
+    shoulder.add(inner);
+    const b1 = new THREE.Mesh(bar1, M.bar); b1.position.y = 0.012; shoulder.add(b1);
+    const b2 = new THREE.Mesh(bar2, M.bar); b2.position.y = 0.012; shoulder.add(b2);
+
+    const elbow = new THREE.Group();
+    elbow.position.set(0, 0, s * 1.6);
+    shoulder.add(elbow);
+    elbow.add(new THREE.Mesh(outerG, M.prim));
+
+    wings.push({ s, shoulder, elbow });
+  }
+
+  root.userData.flap = (t, rate) => {
+    const ph = t * rate;
+    const lift = Math.sin(ph) * 0.85 + 0.12;
+    const tip = Math.sin(ph - 0.7) * 0.55 + 0.05;
+    for (const w of wings) {
+      w.shoulder.rotation.x = -w.s * lift;
+      w.shoulder.rotation.z = Math.cos(ph) * 0.12;      // 下扑时前缘略微下压
+      w.elbow.rotation.x = -w.s * tip;
+    }
+    bob.position.y = -Math.sin(ph) * 0.09;
+    tailPivot.rotation.z = Math.sin(ph + 1.2) * 0.06 - 0.05;
+    head.position.y = 0.62 + Math.sin(ph + 0.5) * 0.015;
+  };
+  return root;
+}
+
+/* ================= 载入模型（有 glb 用 glb，否则用内置） ================= */
+const pivot = new THREE.Group();   // 负责整体位移与转向
+pivot.scale.setScalar(0.66);
+scene.add(pivot);
+let bird = null, mixer = null, flap = null;
+
+async function loadBird() {
+  try {
+    const head = await fetch(CONFIG.modelUrl, { method: 'HEAD' });
+    if (!head.ok) throw new Error('no model');
+    const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+    const gltf = await new GLTFLoader().loadAsync(CONFIG.modelUrl);
+    const obj = gltf.scene;
+    const box = new THREE.Box3().setFromObject(obj);
+    const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+    const k = 4.6 / Math.max(size.x, size.y, size.z);
+    obj.position.sub(center).multiplyScalar(k);
+    obj.scale.setScalar(k);
+    const wrap = new THREE.Group(); wrap.add(obj);
+    if (gltf.animations.length) {
+      mixer = new THREE.AnimationMixer(obj);
+      const clip = gltf.animations.find(a => /fly|flap/i.test(a.name)) || gltf.animations[0];
+      mixer.clipAction(clip).play();
+    }
+    return wrap;
+  } catch (e) {
+    const b = buildPigeon();
+    flap = b.userData.flap;
+    return b;
+  }
+}
+
+/* ================= 尺寸 ================= */
+let W = 1, H = 1;
+function resize() {
+  W = innerWidth; H = innerHeight;
+  renderer.setSize(W, H, false);
+  rt.setSize(Math.floor(W * DPR), Math.floor(H * DPR));
+  post.uniforms.res.value.set(W * DPR, H * DPR);
+  camera.aspect = W / H;
+  // 竖屏时拉远，让鸽子不出框
+  camera.position.z = W / H < 0.9 ? 11 / Math.max(0.55, W / H) * 0.9 : 11;
+  camera.updateProjectionMatrix();
+  maskCanvas.width = Math.ceil(W * MASK_SCALE);
+  maskCanvas.height = Math.ceil(H * MASK_SCALE);
+}
+addEventListener('resize', resize);
+resize();
+
+/* ================= 指针 ================= */
+const hint = document.getElementById('hint');
+let moved = 0;
+function onMove(x, y) {
+  pointer.x = x; pointer.y = y; pointer.active = true;
+  pointer.nx = (x / W) * 2 - 1; pointer.ny = -(y / H) * 2 + 1;
+  if (++moved === 40) hint.classList.add('gone');
+}
+addEventListener('pointermove', e => onMove(e.clientX, e.clientY), { passive: true });
+addEventListener('pointerdown', e => { pointer.px = e.clientX; pointer.py = e.clientY; onMove(e.clientX, e.clientY); }, { passive: true });
+document.addEventListener('pointerleave', () => { pointer.active = false; pointer.px = -9999; });
+
+/* ================= 识别框 ================= */
+const bboxEl = document.getElementById('bbox');
+const bboxLabel = document.getElementById('bboxLabel');
+const tmpBox = new THREE.Box3(), v = new THREE.Vector3();
+let conf = 0.9, lastLabel = 0;
+function updateBBox(t) {
+  if (!bird) return;
+  tmpBox.setFromObject(bird);
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let i = 0; i < 8; i++) {
+    v.set(i & 1 ? tmpBox.max.x : tmpBox.min.x, i & 2 ? tmpBox.max.y : tmpBox.min.y, i & 4 ? tmpBox.max.z : tmpBox.min.z).project(camera);
+    const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
+    x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
+  }
+  const pad = 6;
+  bboxEl.style.transform = `translate(${x0 - pad}px, ${y0 - pad}px)`;
+  bboxEl.style.width = `${x1 - x0 + pad * 2}px`;
+  bboxEl.style.height = `${y1 - y0 + pad * 2}px`;
+  if (t - lastLabel > 0.35) {
+    lastLabel = t;
+    // 指针越靠近鸽子，模型越不确定
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const near = pointer.active ? Math.max(0, 1 - Math.hypot(pointer.x - cx, pointer.y - cy) / 260) : 0;
+    conf = Math.max(0.12, Math.min(0.97, conf + (Math.random() - 0.5) * 0.06 + ((0.92 - near * 0.7) - conf) * 0.3));
+    const label = conf < 0.4 ? (Math.random() < 0.5 ? 'unknown' : 'bird?') : 'pigeon';
+    bboxLabel.textContent = `${label} ${conf.toFixed(2)}`;
+  }
+  bboxEl.classList.add('on');
+}
+
+/* ================= 主循环 ================= */
+const clock = new THREE.Clock();
+let yaw = -0.55, pitch = 0;
+function frame() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+  const sp = reduceMotion ? 0.35 : 1;
+
+  if (bird) {
+    if (flap) flap(t, 5.2 * sp);
+    if (mixer) mixer.update(dt * sp * 0.6);
+
+    // 在画面中缓慢漂移、倾斜，并微微转向指针
+    const tx = Math.sin(t * 0.21 * sp) * 0.9;
+    const ty = Math.sin(t * 0.33 * sp) * 0.35 - 0.15;
+    pivot.position.set(tx, ty, Math.sin(t * 0.17 * sp) * 0.6);
+    const targetYaw = -0.55 + pointer.nx * 0.45 + Math.cos(t * 0.21 * sp) * 0.18;
+    const targetPitch = pointer.ny * 0.18;
+    yaw += (targetYaw - yaw) * Math.min(1, dt * 1.5);
+    pitch += (targetPitch - pitch) * Math.min(1, dt * 1.5);
+    pivot.rotation.set(0, yaw, 0);
+    bird.rotation.set(-Math.cos(t * 0.21 * sp) * 0.22, 0, pitch + Math.sin(t * 0.33 * sp) * 0.05);
+    updateBBox(t);
+  }
+
+  updateMask(dt);
+  post.uniforms.time.value = t;
+
+  renderer.setRenderTarget(rt);
+  renderer.setClearColor(0x000000, 0);
+  renderer.clear();
+  renderer.render(scene, camera);
+  renderer.setRenderTarget(null);
+  renderer.render(postScene, postCam);
+
+  requestAnimationFrame(frame);
+}
+
+loadBird().then(b => {
+  bird = b;
+  pivot.add(bird);
+  document.getElementById('loading').classList.add('gone');
+});
+requestAnimationFrame(frame);
 </script>
 </body>
 </html>
