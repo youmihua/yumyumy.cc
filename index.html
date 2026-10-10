@@ -485,9 +485,10 @@ async function loadBird() {
     const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
     const gltf = await new GLTFLoader().loadAsync(CONFIG.modelUrl);
     const obj = gltf.scene;
+    obj.traverse(o => { if (o.isSkinnedMesh) o.frustumCulled = false; });  // 扇动的整片翅膀不被误裁掉
     const box = new THREE.Box3().setFromObject(obj);
     const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
-    const k = 4.6 / Math.max(size.x, size.y, size.z);
+    const k = 7.2 / Math.max(size.x, size.y, size.z);   // 按翼展归一化，和内置鸽子一样大
     obj.position.sub(center).multiplyScalar(k);
     obj.scale.setScalar(k);
     const wrap = new THREE.Group(); wrap.add(obj);
@@ -537,16 +538,30 @@ document.addEventListener('pointerleave', () => { pointer.active = false; pointe
 const bboxEl = document.getElementById('bbox');
 const bboxLabel = document.getElementById('bboxLabel');
 const tmpBox = new THREE.Box3(), v = new THREE.Vector3();
+const BBOX_STRIDE = 6;   // 翅膀采样间隔：越小越贴合（也越费性能）
 let conf = 0.9, lastLabel = 0;
 function updateBBox(t) {
   if (!bird) return;
-  tmpBox.setFromObject(bird);
+  // 按鸽子此刻的实际姿态取屏幕轮廓：扇动的翅膀（蒙皮网格）逐点采样，其余部件用各自的包围盒角点
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  for (let i = 0; i < 8; i++) {
-    v.set(i & 1 ? tmpBox.max.x : tmpBox.min.x, i & 2 ? tmpBox.max.y : tmpBox.min.y, i & 4 ? tmpBox.max.z : tmpBox.min.z).project(camera);
+  const addPt = () => {
+    v.project(camera);
     const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
     x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
-  }
+  };
+  bird.updateMatrixWorld(true);
+  bird.traverse(o => {
+    if (!o.isMesh || !o.visible) return;
+    const g = o.geometry;
+    if (o.isSkinnedMesh) {
+      const n = g.attributes.position.count;
+      for (let i = 0; i < n; i += BBOX_STRIDE) { o.getVertexPosition(i, v); v.applyMatrix4(o.matrixWorld); addPt(); }
+    } else {
+      if (!g.boundingBox) g.computeBoundingBox();
+      tmpBox.copy(g.boundingBox).applyMatrix4(o.matrixWorld);
+      for (let i = 0; i < 8; i++) { v.set(i & 1 ? tmpBox.max.x : tmpBox.min.x, i & 2 ? tmpBox.max.y : tmpBox.min.y, i & 4 ? tmpBox.max.z : tmpBox.min.z); addPt(); }
+    }
+  });
   const pad = 6;
   bboxEl.style.transform = `translate(${x0 - pad}px, ${y0 - pad}px)`;
   bboxEl.style.width = `${x1 - x0 + pad * 2}px`;
@@ -610,5 +625,3 @@ requestAnimationFrame(frame);
 </script>
 </body>
 </html>
-
-
